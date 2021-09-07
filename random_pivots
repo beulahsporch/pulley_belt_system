@@ -1,0 +1,123 @@
+library(plotrix)
+library(PlotRegionHighlighter) # built in functions for calculting tangent lines
+
+n = 10 # number of circles
+# plot margins
+xmin = -10
+xmax = 10
+ymin = -10
+ymax = 10
+cc = 0.7 # radius of each circle
+
+#-----------------------------------------
+x = runif(n, xmin, xmax)
+y = runif(n, ymin, ymax)
+
+par(mar=c(0,0,0,0))
+h = sqrt(x^2+y^2)
+angles = ifelse(x>0 & y>0, asin(y/h), NA)
+angles = ifelse(x<0 & y>0, pi-asin(y/h), angles)
+angles = ifelse(x<0 & y<0, pi-asin(y/h), angles)
+angles = ifelse(x>0 & y<0, 2*pi+asin(y/h), angles)
+x = x[order(angles)]
+y = y[order(angles)]
+
+plot(x, y, type="p", xaxt="n", yaxt="n", ylab="", xlab="", bty="n", pch="", ylim=c(ymin, ymax), xlim=c(xmin, xmax))
+
+# wrap over or under?
+x. = c(x[n], x, x[1])
+y. = c(y[n], y, y[1])
+hh = c(1:n)
+for(i in 1:n){
+	b = (x.[i+2] - x.[i]) * (y.[i+1] - y.[i]) - (y.[i+2] - y.[i]) * (x.[i+1] - x.[i])
+	hh[i] = ifelse(b<0, 1, 0)
+}
+
+# loop through and plot the parts
+for(i in 1:(n-1)){
+
+draw.circle(x[i], y[i], cc)
+	
+if(hh[i]==1 & hh[i+1]==1){
+c1 = c(x[i], y[i])
+c2 = c(x[i+1], y[i+1])
+coeff = tangentLine(c1, c2, cc, cc, k=-1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+if(hh[i]==1 & hh[i+1]==0){
+c1 = c(x[i], y[i])
+c2 = c(x[i+1], y[i+1])
+coeff = tangentLine(c1, c2, -cc, cc, k=1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+if(hh[i]==0 & hh[i+1]==1){
+c1 = c(x[i], y[i])
+c2 = c(x[i+1], y[i+1])
+coeff = tangentLine(c1, c2, cc, -cc, k=1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+if(hh[i]==0 & hh[i+1]==0){
+c1 = c(x[i], y[i])
+c2 = c(x[i+1], y[i+1])
+coeff = tangentLine(c1, c2, cc, cc, k=1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+
+perp = -1/m
+b.perp1 = y[i]-x[i]*(perp)
+b.perp2 = y[i+1]-x[i+1]*(perp)
+xx1 = (b.perp1-b)/(m-perp)
+yy1 = m*xx1+b
+xx2 = (b.perp2-b)/(m-perp)
+yy2 = m*xx2+b
+
+lines(c(xx1, xx2), c(yy1, yy2))
+}
+
+
+
+# close the system
+i = n
+draw.circle(x[i], y[i], cc)
+if(hh[i]==1 & hh[1]==1){
+c1 = c(x[i], y[i])
+c2 = c(x[1], y[1])
+coeff = tangentLine(c1, c2, cc, cc, k=-1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+if(hh[i]==1 & hh[1]==0){
+c1 = c(x[i], y[i])
+c2 = c(x[1], y[1])
+coeff = tangentLine(c1, c2, -cc, cc, k=1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+if(hh[i]==0 & hh[1]==1){
+c1 = c(x[i], y[i])
+c2 = c(x[1], y[1])
+coeff = tangentLine(c1, c2, cc, -cc, k=1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+if(hh[i]==0 & hh[1]==0){
+c1 = c(x[i], y[i])
+c2 = c(x[1], y[1])
+coeff = tangentLine(c1, c2, cc, cc, k=1)
+m = coeff[1]/-coeff[2]
+b = coeff[3]/-coeff[2]
+}
+
+perp = -1/m
+b.perp1 = y[i]-x[i]*(perp)
+b.perp2 = y[1]-x[1]*(perp)
+xx1 = (b.perp1-b)/(m-perp)
+yy1 = m*xx1+b
+xx2 = (b.perp2-b)/(m-perp)
+yy2 = m*xx2+b
+
+lines(c(xx1, xx2), c(yy1, yy2))
